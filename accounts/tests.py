@@ -1,36 +1,27 @@
 from django.test import TestCase
+from datetime import datetime
 from .models import TwitterAccount, TwitterThread
 
-class TwitterThreadModelTestCase(TestCase):
-    """
-    Test case for the TwitterThread model
-    """
 
+class TwitterAccountTestCase(TestCase):
+    def test_create_account(self):
+        account = TwitterAccount.objects.create(twitter_handle='test_user', account_id='12345')
+
+        self.assertEqual(account.twitter_handle, 'test_user')
+        self.assertEqual(account.account_id, '12345')
+        self.assertIsNotNone(account.created_at)
+        # self.assertIsNotNone(account.updated_at)
+        
+
+
+class TwitterThreadTestCase(TestCase):
     def setUp(self):
-        """
-        Create a new TwitterAccount object for testing
-        """
-        self.account = TwitterAccount.objects.create(username='test_user')
+        self.test_account = TwitterAccount.objects.create(twitter_handle='test_user', account_id='12345')
+        self.test_thread = TwitterThread.objects.create(account=self.test_account, conversation_id='123', tweet_count=2)
 
     def test_create_thread(self):
-        """
-        Test creating a new TwitterThread object
-        """
-        tweet_id = 123456789
-        conversation = '{"tweets": [{"text": "Hello, world!"}]}'
-        thread = TwitterThread.objects.create(account=self.account, tweet_id=tweet_id, conversation=conversation)
-
-        self.assertEqual(thread.account, self.account)
-        self.assertEqual(thread.tweet_id, tweet_id)
-        self.assertEqual(thread.conversation, conversation)
-
-    def test_optional_conversation_id(self):
-        """
-        Test creating a new TwitterThread object with an optional conversation_id field
-        """
-        tweet_id = 123456789
-        conversation_id = '1234567890'
-        conversation = '{"tweets": [{"text": "Hello, world!"}]}'
-        thread = TwitterThread.objects.create(account=self.account, tweet_id=tweet_id, conversation_id=conversation_id, conversation=conversation)
-
-        self.assertEqual(thread.conversation_id, conversation_id)
+        self.assertEqual(self.test_thread.account, self.test_account)
+        self.assertEqual(self.test_thread.conversation_id, '123')
+        self.assertEqual(self.test_thread.tweet_count, 2)
+        self.assertIsInstance(self.test_thread.created_at, datetime)
+        self.assertIsInstance(self.test_thread.updated_at, datetime)

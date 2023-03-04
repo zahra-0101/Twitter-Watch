@@ -15,9 +15,13 @@ class TwitterAccount(models.Model):
     )
 
     # Twitter account ID
-    account_id = models.IntegerField(
-        blank=False
+    account_id = models.CharField(
+        max_length=255, 
+        unique=True, 
+        null=True, 
+        blank=True
     )
+
     # Twitter account display name
     display_name = models.CharField(
         max_length=100
