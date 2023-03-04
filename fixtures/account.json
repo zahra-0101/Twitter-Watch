@@ -1,0 +1,72 @@
+[
+  {
+    "pk": 1,
+    "model": "accounts.twitteraccount",
+    "fields": {
+      "twitter_handle": "user_1",
+      "account_id": "111111",
+      "display_name": "User One",
+      "bio": "This is the bio for User One.",
+      "profile_picture": "https://example.com/user_1.jpg",
+      "follower_count": 100,
+      "following_count": 50,
+      "created_at": "2022-03-06T15:20:00.000000Z"
+    }
+    },
+  {
+    "pk": 2,
+    "model": "accounts.twitteraccount",
+    "fields": {
+      "twitter_handle": "user_2",
+      "account_id": "222222",
+      "display_name": "User Two",
+      "bio": "This is the bio for User Two.",
+      "profile_picture": "https://example.com/user_2.jpg",
+      "follower_count": 200,
+      "following_count": 75,
+      "created_at": "2022-03-06T15:21:00.000000Z"
+    }
+    },
+  {
+    "pk": 3,
+    "model": "accounts.twitteraccount",
+    "fields": {
+      "twitter_handle": "user_3",
+      "account_id": "333333",
+      "display_name": "User Three",
+      "bio": "This is the bio for User Three.",
+      "profile_picture": "https://example.com/user_3.jpg",
+      "follower_count": 300,
+      "following_count": 100,
+      "created_at": "2022-03-06T15:22:00.000000Z"
+    }
+    },
+  {
+    "pk": 4,
+    "model": "accounts.twitteraccount",
+    "fields": {
+      "twitter_handle": "user_4",
+      "account_id": "444444",
+      "display_name": "User Four",
+      "bio": "This is the bio for User Four.",
+      "profile_picture": "https://example.com/user_4.jpg",
+      "follower_count": 400,
+      "following_count": 125,
+      "created_at": "2022-03-06T15:23:00.000000Z"
+    }
+    },
+  {
+    "pk": 5,
+    "model": "accounts.twitteraccount",
+    "fields": {
+      "twitter_handle": "user_5",
+      "account_id": "555555",
+      "display_name": "User Five",
+      "bio": "This is the bio for User Five.",
+      "profile_picture": "https://example.com/user_5.jpg",
+      "follower_count": 500,
+      "following_count": 150,
+      "created_at": "2022-03-06T15:24:00.000000Z"
+    }
+    }
+]

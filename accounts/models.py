@@ -90,8 +90,9 @@ class TwitterThread(models.Model):
     # Date when the thread was added to the database
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        verbose_name = "Twitter Thread"
+        verbose_name_plural = "Twitter Threads"
+
     def __str__(self):
-        """
-        String representation of the TwitterThread model
-        """
-        return f'{self.account.username} - Thread {self.tweet_id}'
+        return f"{self.account.username}'s Twitter Thread {self.id}"
