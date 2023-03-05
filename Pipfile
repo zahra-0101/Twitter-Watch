@@ -8,6 +8,7 @@ django-admin = "*"
 django = "*"
 psycopg2-binary = "*"
 djangorestframework = "*"
+tweepy = "*"
 
 [dev-packages]
 
