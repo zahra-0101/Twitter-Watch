@@ -56,6 +56,11 @@ class TwitterAccount(models.Model):
         auto_now_add=True
     )
 
+    last_tweet_id = models.IntegerField(
+        null=True,
+        blank=True
+    )
+
     def __str__(self):
         """
         String representation of the TwitterAccount model
@@ -78,6 +83,12 @@ class TwitterThread(models.Model):
     # Thread tweet ID (the first tweet in the thread)
     tweet_id = models.BigIntegerField()
 
+    tweet_text = models.CharField(
+        max_length=1000, 
+        null=True, 
+        blank=True
+    )
+
     # Conversation ID of the thread (optional)
     conversation_id = models.CharField(
         max_length=255, 
@@ -89,6 +100,24 @@ class TwitterThread(models.Model):
 
     # Date when the thread was added to the database
     created_at = models.DateTimeField(auto_now_add=True)
+
+    # Basic information
+    num_tweets = models.IntegerField(null=True)  # the number of tweets in the conversation
+    start_time = models.DateTimeField(null=True)  # the time when the first tweet was posted
+    end_time = models.DateTimeField(null=True)  # the time when the last tweet was posted
+
+    # Tweet-level features
+    tweet_length = models.TextField(null=True)  # the length of each tweet in terms of characters
+    hashtags = models.TextField(null=True)  # the hashtags used in the conversation
+    mentions = models.TextField(null=True)  # the usernames mentioned in the conversation
+    emojis = models.TextField(null=True)  # the emojis used in the conversation
+    sentiment = models.CharField(null=True, max_length=255)  # the sentiment of each tweet (positive, negative, or neutral)
+    time_stamp = models.DateTimeField(null=True)  # the time when each tweet was posted
+    replies = models.IntegerField(null=True)  # the number of replies to each tweet
+    retweets = models.IntegerField(null=True)  # the number of retweets for each tweet
+
+    # User-level features
+    unique_user = models.IntegerField(null=True) # the number of unique users contributed in the thread
 
     class Meta:
         verbose_name = "Twitter Thread"
