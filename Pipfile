@@ -8,9 +8,10 @@ django-admin = "*"
 django = "*"
 psycopg2-binary = "*"
 djangorestframework = "*"
-tweepy = "*"
+tweepy = "3.10.0"
+celery = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.10"
+python_version = "3.8"
