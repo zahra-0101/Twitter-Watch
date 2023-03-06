@@ -18,3 +18,10 @@ class TwitterThreadSerializer(serializers.ModelSerializer):
         queryset = TwitterThread.objects.filter(account__twitter_handle=instance['account'])
         conversations = [thread.conversation for thread in queryset]
         return {'conversations': conversations}
+    
+
+class AudienceInfoSerializer(serializers.Serializer):
+    followers_count = serializers.IntegerField()
+    following_count = serializers.IntegerField()
+    tweet_count = serializers.IntegerField()
+    created_at = serializers.DateTimeField()
