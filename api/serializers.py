@@ -24,4 +24,11 @@ class AudienceInfoSerializer(serializers.Serializer):
     followers_count = serializers.IntegerField()
     following_count = serializers.IntegerField()
     tweet_count = serializers.IntegerField()
+    followers_to_following_rate = serializers.IntegerField()
+    # user_dic = serializers.JSONField()
+
+class SentimentSerializer(serializers.Serializer):
+    followers_count = serializers.IntegerField()
+    following_count = serializers.IntegerField()
+    tweet_count = serializers.IntegerField()
     created_at = serializers.DateTimeField()

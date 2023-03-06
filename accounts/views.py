@@ -7,6 +7,7 @@ import tweepy
 from datetime import datetime
 import pytz
 import time
+from collections import Counter
 
 utc=pytz.UTC
 
@@ -105,8 +106,7 @@ def get_user_threads_since_date(api):
                 if e == 'Error: Failed to send request' +'\n' + '429 Too Many Requests':
                     print('sleep')
                     time.sleep(900)
-                    retry_count = 0
-            
+                    retry_count = 0       
 
 
 @authenticate
@@ -125,7 +125,7 @@ def get_user_threads_since_id(api):
         for tweet in tweets:
             replies = []
             replies.append(tweet.full_text)
-            for reply in tweepy.Cursor(api.search, q='to:'+account.twitter_handle, since_id=tweet.id, tweet_mode='extended').items():
+            for reply in tweepy.Cursor(api.search_tweets, q='to:'+account.twitter_handle, since_id=tweet.id, tweet_mode='extended').items():
                 if hasattr(reply, 'in_reply_to_status_id_str'):
                     if reply.in_reply_to_status_id_str == tweet.id_str:
                         replies.append({
@@ -149,3 +149,38 @@ def get_user_threads_since_id(api):
 
         print(account.twitter_handle)
         
+
+
+def get_last_200_tweets(api, twitter_handle):
+    tweets = [] 
+    for tweet in tweepy.Cursor(api.user_timeline, id=twitter_handle).items(5):
+        tweets.append(tweet)
+    return tweets
+
+
+def get_all_replies_belong_to_a_tweet(api, tweet):
+    replies = []
+    for reply in tweepy.Cursor(api.search_tweets, q="to:" + api.get_status(tweet.id).user.screen_name, since_id=tweet.id, tweet_mode="extended").items():
+        replies.append(reply) 
+    return replies
+     
+
+def extract_unique_user_from_replies(replies):
+    users_screen_name = []
+    users_location = []
+    # followers_reply = []
+    for reply in replies:
+        # for reply in r:
+        #     print(r)
+        users_screen_name.append(reply.entities['user_mentions'][0]['screen_name'])
+        users_location.append(reply.entities['user_mentions'][0]['location'])
+        # followers_reply.append(reply.entities['user_mentions'][0]['location'])
+    return Counter(users_screen_name) , users_location
+
+
+def extract_full_text_from_replies(replies):
+    full_text = []
+    for reply in replies:
+        full_text.append(reply.entities['user_mentions'][0]['screen_name'])
+    return full_text
+
