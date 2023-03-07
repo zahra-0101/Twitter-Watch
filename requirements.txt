@@ -1,10 +1,9 @@
-@@ -1,42 +1,9 @@
-django-admin="*"
-django="*"
-psycopg2-binary=="*"
-djangorestframework=="*"
-tweepy=="3.10.0"
-celery=="*"
-redis=="*"
-whitenoise=="*"
-python_version=="3.8"
+django-admin==2.0.2
+Django==4.1.7
+psycopg2-binary==2.9.5
+djangorestframework==3.14.0
+tweepy==4.12.1
+celery==5.2.7
+redis==4.5.1
+whitenoise=5.2.0
+python_version==3.8
