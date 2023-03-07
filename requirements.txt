@@ -6,4 +6,3 @@ tweepy==4.12.1
 celery==5.2.7
 redis==4.5.1
 whitenoise==5.2.0
-python_version==3.8
