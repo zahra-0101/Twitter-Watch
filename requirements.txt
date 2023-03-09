@@ -1,7 +1,10 @@
-django-admin==2.0.2
-Django==4.1.7
-psycopg2-binary==2.9.5
-djangorestframework==3.14.0
-tweepy==4.12.1
 celery==5.2.7
+dj-database-url==1.2.0
+Django==4.1.7
+django-admin==2.0.2
+djangorestframework==3.14.0
+eql==0.9.15
+psycopg2-binary==2.9.5
 redis==4.5.1
+snscrape==0.6.0.20230303
+tweepy==3.10.0
