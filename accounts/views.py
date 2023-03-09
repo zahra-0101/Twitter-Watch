@@ -1,43 +1,26 @@
-from django.shortcuts import render
-from accounts.models import TwitterAccount, TwitterThread
-# Create your views here.
-import os
 import configparser
-import tweepy
+import datetime as dt
+import os
 from datetime import datetime
+
 import pytz
-import time
-from collections import Counter
+import snscrape.modules.twitter as sntwitter
+import tweepy
+from django.shortcuts import render
+from django.utils import timezone
+from django.db import IntegrityError
+
+from accounts.models import TwitterAccount, TwitterThread
+
+from .decorators import handle_rate_limit_error, authenticate
 
 utc=pytz.UTC
 
-def authenticate(func):
-    def wrapper():
-        # Get the path to the config.ini file in the root directory of the Django project
-        config_path = os.path.join(os.path.dirname(
-            os.path.dirname(os.path.abspath(__file__))), 'config.ini')
-
-        # Read the Twitter API credentials from conf/ig.ini
-        config = configparser.ConfigParser()
-        config.read(config_path)
-        consumer_key = config['TwitterAPI']['consumer_key']
-        consumer_secret = config['TwitterAPI']['consumer_secret']
-        access_token = config['TwitterAPI']['access_token']
-        access_token_secret = config['TwitterAPI']['access_token_secret']
-        # print ('access_token_secret', access_token_secret)
-        # Authenticate with Twitter API
-        # auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-        # auth.set_access_token(access_token, access_token_secret)
-        auth = tweepy.OAuthHandler(consumer_key, consumer_secret, access_token, access_token_secret)
-        api = tweepy.API(auth)
-
-        # Call the function with the authenticated API object
-        func(api)
-        # return api
-    return wrapper
 
 @authenticate
 def update_accounts(api):
+    # updates Twitter accounts information.
+
     accounts = TwitterAccount.objects.all()
     for account in accounts:
         user = api.get_user(screen_name=account.twitter_handle)
@@ -47,140 +30,115 @@ def update_accounts(api):
         accounts.profile_picture = user.profile_image_url
         accounts.follower_count = user.followers_count
         account.following_count = user.friends_count
-        accounts.created_at = user.created_at
+        account.last_updated = timezone.now().time()
         account.save()
 
+def update_account(api, account, rate_limit):
+    # updates a Twitter account information.
 
-@authenticate
-def get_user_threads_since_date(api):
-    """
-    Extracts all threads belonging to a user starting from a specific date.
-    """
-    since_time = datetime(2023, 2, 1)  # set the time range as February 1st, 2023
-    
-    accounts = TwitterAccount.objects.all()
-    for account in accounts:
-    
-        MAX_RETRIES = 3  # maximum number of times to retry the request
-        retry_count = 0  # current number of retries
-
-        while retry_count < MAX_RETRIES:
-            try:
-                tweets = []
-                for tweet in tweepy.Cursor(api.user_timeline, screen_name=account.twitter_handle, tweet_mode='extended').items():
-                    # print(1)
-                    if tweet.created_at > utc.localize(since_time):
-                        tweets.append(tweet)
-                print(account.twitter_handle)
-                for tweet in tweets:
-                    replies = []
-                    replies.append(tweet.full_text)
-                    for reply in tweepy.Cursor(api.search_tweets, q='to:'+account.twitter_handle, since_id=tweet.id, tweet_mode='extended').items():
-                        if hasattr(reply, 'in_reply_to_status_id_str'):
-                            if reply.in_reply_to_status_id_str == tweet.id_str:
-                                replies.append({
-                                'author': reply.user.screen_name,
-                                'text': reply.full_text,
-                                'num_likes': reply.favorite_count
-                            })
-                            
-                    new_thread = TwitterThread(
-                    account=account,
-                    tweet_id=tweet.id,
-                    tweet_text=tweet.full_text,
-                    # conversation_id=tweet.conversation_id,
-                    conversation=replies,
-                    created_at=datetime.now()
-                    )
-                    # save the instance to the database
-                    new_thread.save()
-                TwitterAccount.objects.filter(pk=account.id).update(
-                    last_tweet_id = tweet.id)
-
-            except tweepy.TweepyException as e:
-                print("Error: Failed to send request")
-                print(e)
-                retry_count += 1  # increment the retry count
-                time.sleep(5)
-                print(account.twitter_handle)
-                if e == 'Error: Failed to send request' +'\n' + '429 Too Many Requests':
-                    print('sleep')
-                    time.sleep(900)
-                    retry_count = 0       
+    user = api.get_user(screen_name=account.twitter_handle)
+    account.display_name = user.name
+    account.bio = user.description
+    account.profile_picture = user.profile_image_url
+    account.follower_count = user.followers_count
+    account.following_count = user.friends_count
+    account.last_updated = timezone.now().time()
+    account.rate_limit = rate_limit
+    account.save()
+ 
+ 
+# @handle_rate_limit_error
+# def update_thread(api, tweet):
+#     replies = []
+#     # Search for replies to the tweet using the tweet ID
+#     replies.append(tweet.text)
+#     for reply in tweepy.Cursor(api.search, q='to:{}'.format(tweet.id), since_id=tweet.id, tweet_mode='extended').items():                   
+#         if reply.in_reply_to_status_id_str == tweet.id_str:
+#             replies.append({
+#             'author': reply.user.screen_name,
+#             'text': reply.full_text,
+#             'num_likes': reply.favorite_count
+#         })
+#     TwitterThread.objects.filter(pk=tweet.id).update(
+#                     conversation = replies,
+#                     last_update = timezone.now().time()
+#     )
 
 
-@authenticate
-def get_user_threads_since_id(api):
-    """
-    Extracts all threads belonging to a user after a specific tweet id.
-    """
-
-    accounts = TwitterAccount.objects.all()
-    for account in accounts:
-    
-        tweets = []
-        for tweet in tweepy.Cursor(api.user_timeline, screen_name=account.twitter_handle, since_id=account.last_tweet_id).items():
-            tweets.append(tweet)
-        print(account.twitter_handle)
-        for tweet in tweets:
-            replies = []
-            replies.append(tweet.full_text)
-            for reply in tweepy.Cursor(api.search_tweets, q='to:'+account.twitter_handle, since_id=tweet.id, tweet_mode='extended').items():
-                if hasattr(reply, 'in_reply_to_status_id_str'):
-                    if reply.in_reply_to_status_id_str == tweet.id_str:
-                        replies.append({
-                        'author': reply.user.screen_name,
-                        'text': reply.full_text,
-                        'num_likes': reply.favorite_count
-                    })
-                    
-            new_thread = TwitterThread(
-            account=account.id,
-            tweet_id=tweet.id,
-            tweet_text=tweet.full_text,
-            # conversation_id=tweet.conversation_id,
-            conversation=replies,
-            created_at=datetime.now()
-            )
-            # save the instance to the database
-            new_thread.save()
-        TwitterAccount.objects.filter(pk=account.id).update(
-            last_tweet_id = tweet.id)
-
-        print(account.twitter_handle)
-        
-
-
-def get_last_200_tweets(api, twitter_handle):
-    tweets = [] 
-    for tweet in tweepy.Cursor(api.user_timeline, id=twitter_handle).items(5):
-        tweets.append(tweet)
-    return tweets
-
-
-def get_all_replies_belong_to_a_tweet(api, tweet):
+def get_all_replies_belong_to_a_tweet(api, account, tweet):
     replies = []
-    for reply in tweepy.Cursor(api.search_tweets, q="to:" + api.get_status(tweet.id).user.screen_name, since_id=tweet.id, tweet_mode="extended").items():
-        replies.append(reply) 
+    replies.append(tweet.rawContent)
+    for reply in enumerate(sntwitter.TwitterSearchScraper(f'conversation_id:{tweet.conversationId} filter:safe').get_items()):
+        if hasattr(reply, 'in_reply_to_status_id_str'):
+            if reply.in_reply_to_status_id_str == str(tweet.id):
+                replies.append({
+                'author': reply.user.screen_name,
+                'text': reply.full_text,
+                'num_likes': reply.favorite_count
+            })
     return replies
-     
-
-def extract_unique_user_from_replies(replies):
-    users_screen_name = []
-    users_location = []
-    # followers_reply = []
-    for reply in replies:
-        # for reply in r:
-        #     print(r)
-        users_screen_name.append(reply.entities['user_mentions'][0]['screen_name'])
-        users_location.append(reply.entities['user_mentions'][0]['location'])
-        # followers_reply.append(reply.entities['user_mentions'][0]['location'])
-    return Counter(users_screen_name) , users_location
 
 
-def extract_full_text_from_replies(replies):
-    full_text = []
-    for reply in replies:
-        full_text.append(reply.entities['user_mentions'][0]['screen_name'])
-    return full_text
+@handle_rate_limit_error
+def database_initializer(api, accounts, since_time):
+    start_date = since_time
+
+    # Define the search query
+    for account in accounts:
+        if since_time:
+            search_query = "from:{} since:{} ".format(account.twitter_handle, start_date)
+        else:
+            search_query = "from:{} since_id:{}".format(account.twitter_handle, account.last_tweet_id)
+
+        for i, tweet in enumerate(sntwitter.TwitterSearchScraper(search_query).get_items()):
+
+            replies = get_all_replies_belong_to_a_tweet(api, account, tweet)
+            try:
+                new_thread = TwitterThread(
+                account=account,
+                tweet_id=tweet.id,
+                tweet_text=tweet.rawContent,
+                # conversation_id=tweet.conversation_id,
+                conversation=replies,
+                created_at=datetime.now()
+                )
+                # save the instance to the database
+                new_thread.save()
+            except IntegrityError:
+                pass
+
+            TwitterAccount.objects.filter(pk=account.id).update(
+                last_tweet_id = tweet.id)
+            update_account(api, account, True)
+            print('database_initializer')
+
+        update_account(api, account, False)
+
+      
+@authenticate
+def update_tweets_for_user(api):
+    """
+    Extracts all threads belonging to a user (as long as possible) starting from a specific date.
+    """
+
+    # Create an empty list to hold the tweets
+    tweets = []
+    since_time = datetime(2023, 2, 1)  # set the time range as February 1st, 2023
+    accounts = TwitterAccount.objects.filter(rate_limit=False).order_by('-last_updated')
+
+    if accounts.exists():
+        # initializing database
+        print(accounts)
+        database_initializer(api, accounts, since_time) 
+
+
+@authenticate
+def update_database(api):
+    """
+    Update Database
+    """
+
+    update_accounts(api)
+    accounts = TwitterAccount.objects.filter(rate_limit=False).order_by('-last_updated')
+    database_initializer(api, accounts)
 
