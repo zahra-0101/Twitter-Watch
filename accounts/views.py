@@ -33,6 +33,7 @@ def update_accounts(api):
         account.last_updated = timezone.now().time()
         account.save()
 
+
 def update_account(api, account, rate_limit):
     # updates a Twitter account information.
 
@@ -68,25 +69,28 @@ def update_account(api, account, rate_limit):
 def get_all_replies_belong_to_a_tweet(api, account, tweet):
     replies = []
     replies.append(tweet.rawContent)
-    for reply in enumerate(sntwitter.TwitterSearchScraper(f'conversation_id:{tweet.conversationId} filter:safe').get_items()):
-        if hasattr(reply, 'in_reply_to_status_id_str'):
-            if reply.in_reply_to_status_id_str == str(tweet.id):
-                replies.append({
-                'author': reply.user.screen_name,
-                'text': reply.full_text,
-                'num_likes': reply.favorite_count
-            })
+    for i, reply in enumerate(sntwitter.TwitterSearchScraper(f'conversation_id:{tweet.conversationId} filter:safe').get_items()):
+       
+        replies.append({
+            'author': reply.user.username,
+            'text': reply.rawContent,
+            'num_likes': reply.likeCount,
+            'followersCount': reply.user.followersCount,
+            'favouritesCount': reply.user.favouritesCount,
+            'friendsCount': reply.user.friendsCount
+        })
     return replies
 
 
 @handle_rate_limit_error
 def database_initializer(api, accounts, since_time):
-    start_date = since_time
+    start_date = dt.date(2023, 2, 1)  # set the time range as February 1st, 2023
+    end_date = dt.date.today()
 
     # Define the search query
     for account in accounts:
         if since_time:
-            search_query = "from:{} since:{} ".format(account.twitter_handle, start_date)
+            search_query = "from:{} since:{} until:{}".format(account.twitter_handle, start_date, end_date)
         else:
             search_query = "from:{} since_id:{}".format(account.twitter_handle, account.last_tweet_id)
 
@@ -123,13 +127,13 @@ def update_tweets_for_user(api):
 
     # Create an empty list to hold the tweets
     tweets = []
-    since_time = datetime(2023, 2, 1)  # set the time range as February 1st, 2023
-    accounts = TwitterAccount.objects.filter(rate_limit=False).order_by('-last_updated')
+    since_time = dt.date(2023, 2, 1)  # set the time range as February 1st, 2023
+    accounts = TwitterAccount.objects.all()
 
     if accounts.exists():
         # initializing database
         print(accounts)
-        database_initializer(api, accounts, since_time) 
+        database_initializer(api, accounts, True) 
 
 
 @authenticate
@@ -138,7 +142,7 @@ def update_database(api):
     Update Database
     """
 
-    update_accounts(api)
-    accounts = TwitterAccount.objects.filter(rate_limit=False).order_by('-last_updated')
-    database_initializer(api, accounts)
+    update_accounts()
+    accounts = TwitterAccount.objects.all().order_by('-last_updated')
+    database_initializer(api, accounts, False)
 
