@@ -1,4 +1,7 @@
 import time
+import os 
+import tweepy
+import configparser
 
 
 def authenticate(func):

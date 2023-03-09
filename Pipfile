@@ -8,8 +8,12 @@ django-admin = "*"
 django = "*"
 psycopg2-binary = "*"
 djangorestframework = "*"
-tweepy = "3.10.0"
 celery = "*"
+redis = "*"
+tweepy = "==3.10.0"
+snscrape = {git = "https://github.com/JustAnotherArchivist/snscrape.git"}
+eql = "*"
+dj-database-url = "*"
 
 [dev-packages]
 
