@@ -1,15 +1,18 @@
-from django.shortcuts import render
 import configparser
 import os
-# Create your views here.
-from rest_framework import generics
-from accounts.models import TwitterAccount, TwitterThread
-from .serializers import TwitterAccountSerializer, TwitterThreadSerializer, AudienceInfoSerializer
-from rest_framework.views import APIView
-from rest_framework.response import Response
+
 import tweepy
-from accounts.views import authenticate, get_last_200_tweets, get_all_replies_belong_to_a_tweet, extract_unique_user_from_replies
-# from .models import TwitterThread
+from django.shortcuts import render
+from rest_framework import generics
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from accounts.models import TwitterAccount, TwitterThread
+
+from .serializers import (AudienceInfoSerializer, TwitterAccountSerializer,
+                          TwitterThreadSerializer)
+
+
 class TwitterAccountList(generics.ListCreateAPIView):
     queryset = TwitterAccount.objects.all()
     serializer_class = TwitterAccountSerializer
@@ -17,8 +20,13 @@ class TwitterAccountList(generics.ListCreateAPIView):
 
 class TwitterThreadAPIView(APIView):
     def get(self, request, twitter_handle):
+        # Retrieve all TwitterThread objects associated with the twitter_handle parameter
         threads = TwitterThread.objects.filter(account__twitter_handle=twitter_handle)
+        
+        # Serialize the threads data using the TwitterThreadSerializer
         serializer = TwitterThreadSerializer({'account': twitter_handle, 'threads': threads})
+
+        # Return the serialized data as a HTTP response
         return Response(serializer.data)
     
 
@@ -37,10 +45,6 @@ class AudienceInfoAPIView(generics.GenericAPIView ):
         consumer_secret = config['TwitterAPI']['consumer_secret']
         access_token = config['TwitterAPI']['access_token']
         access_token_secret = config['TwitterAPI']['access_token_secret']
-        # print ('access_token_secret', access_token_secret)
-        # Authenticate with Twitter API
-        # auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-        # auth.set_access_token(access_token, access_token_secret)
         auth = tweepy.OAuthHandler(consumer_key, consumer_secret, access_token, access_token_secret)
         api = tweepy.API(auth)
         user = api.get_user(screen_name=twitter_handle)
@@ -50,6 +54,7 @@ class AudienceInfoAPIView(generics.GenericAPIView ):
         following_count = user.friends_count
         tweet_count = user.statuses_count
 
+        # TODO: Uncomment this code to retrieve more audience information
         # tweets = get_last_200_tweets(api, twitter_handle)
         # replies = []
         # for tweet in tweets:
@@ -57,6 +62,7 @@ class AudienceInfoAPIView(generics.GenericAPIView ):
         #         get_all_replies_belong_to_a_tweet(api, tweet)
         #     })
         # users_screen_name, users_location = extract_unique_user_from_replies(replies)
+
         # Serialize the audience information and return it as a response
         audience_info = {
             'followers_count': followers_count,
@@ -85,10 +91,8 @@ class SentimentAPIView(generics.GenericAPIView ):
         consumer_secret = config['TwitterAPI']['consumer_secret']
         access_token = config['TwitterAPI']['access_token']
         access_token_secret = config['TwitterAPI']['access_token_secret']
-        # print ('access_token_secret', access_token_secret)
+
         # Authenticate with Twitter API
-        # auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-        # auth.set_access_token(access_token, access_token_secret)
         auth = tweepy.OAuthHandler(consumer_key, consumer_secret, access_token, access_token_secret)
         api = tweepy.API(auth)
         user = api.get_user(screen_name=twitter_handle)
@@ -98,7 +102,8 @@ class SentimentAPIView(generics.GenericAPIView ):
         following_count = user.friends_count
         tweet_count = user.statuses_count
         created_at = user.created_at
-        #  hashtag
+        #TODO  hashtag
+
         # Serialize the audience information and return it as a response
         audience_info = {
             'followers_count': followers_count,

@@ -40,13 +40,13 @@ class TwitterAccount(models.Model):
     )
 
     # Twitter account follower count
-    follower_count = models.IntegerField(
+    follower_count = models.BigIntegerField(
         null=True,
         blank=True
     )
 
     # Twitter account follower count
-    following_count = models.IntegerField(
+    following_count = models.BigIntegerField(
         null=True, 
         blank=True
     )
@@ -56,16 +56,19 @@ class TwitterAccount(models.Model):
         auto_now_add=True
     )
 
-    last_tweet_id = models.IntegerField(
+    last_tweet_id = models.BigIntegerField(
         null=True,
         blank=True
     )
 
+    last_updated = models.DateTimeField(auto_now=True)
+
+    rate_limit = models.BooleanField(default=False)
     def __str__(self):
         """
         String representation of the TwitterAccount model
         """
-        return self.username
+        return self.twitter_handle
 
 
 
@@ -96,10 +99,12 @@ class TwitterThread(models.Model):
         blank=True)
 
     # Thread conversation (as a JSON string)
-    conversation = models.TextField()
+    conversation = models.TextField(blank=True, null=True)
 
     # Date when the thread was added to the database
     created_at = models.DateTimeField(auto_now_add=True)
+
+    last_updated = models.DateTimeField(auto_now=True)
 
     # Basic information
     num_tweets = models.IntegerField(null=True)  # the number of tweets in the conversation
@@ -120,6 +125,7 @@ class TwitterThread(models.Model):
     unique_user = models.IntegerField(null=True) # the number of unique users contributed in the thread
 
     class Meta:
+        unique_together = ['account', 'tweet_id']
         verbose_name = "Twitter Thread"
         verbose_name_plural = "Twitter Threads"
 
