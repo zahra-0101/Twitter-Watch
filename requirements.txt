@@ -1,5 +1,5 @@
 celery==5.2.7
-dj-database-url==1.2.0
+dj_database_url==0.4.2
 Django==4.1.7
 django-admin==2.0.2
 djangorestframework==3.14.0
@@ -8,3 +8,4 @@ psycopg2-binary==2.9.5
 redis==4.5.1
 snscrape==0.6.0.20230303
 tweepy==3.10.0
+
