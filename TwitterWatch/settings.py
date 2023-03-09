@@ -86,11 +86,11 @@ WSGI_APPLICATION = 'TwitterWatch.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME', 'twitter'),
-        'USER': os.environ.get('DB_USER', 'twitter'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', 1234),
-        'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
+        'NAME': 'kjlwmxao',
+        'USER': 'kjlwmxao',
+        'PASSWORD': 'XkgK5YPgvxDslRZRWllHSIzJH8Mo0nTg',
+        'HOST': 'tiny.db.elephantsql.com',
+        'PORT': '5432',
     }
 }
 
