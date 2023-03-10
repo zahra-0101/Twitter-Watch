@@ -16,10 +16,10 @@ def authenticate(func):
         # Read the Twitter API credentials from conf/ig.ini
         config = configparser.ConfigParser()
         config.read(config_path)
-        consumer_key = config['TwitterAPI']['consumer_key']
-        consumer_secret = config['TwitterAPI']['consumer_secret']
-        access_token = config['TwitterAPI']['access_token']
-        access_token_secret = config['TwitterAPI']['access_token_secret']
+        consumer_key = os.environ.get('consumer_key') 
+        consumer_secret = os.environ.get('consumer_secret')
+        access_token = os.environ.get('access_token')
+        access_token_secret = os.environ.get('access_token_secret')
 
         # Authenticate with Twitter API
         auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
