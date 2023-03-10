@@ -23,5 +23,8 @@
 		"src": "/(.*)",
 		"dest": "TwitterWatch/wsgi.py"
 	  }
-	]
-  }
+	],
+	"scripts": {
+		"start": "celery -A TwitterWatch worker -l info"
+	}
+}

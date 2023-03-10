@@ -1,15 +1,35 @@
-# from __future__ import absolute_import, unicode_literals
+from TwitterWatch.celery import app
+
+# @app.task
+# def print_text():
+#     app.send_task('myproject.tasks.print_text')
+    
+
 # from celery import shared_task
-# from datetime import datetime, timedelta
-# from django.utils import timezone
-# from .views import get_user_threads_since_id
+# from .globals import MY_GLOBAL_PARAM
 
 # @shared_task
-# def get_user_threads_since_id_task():
-#     get_user_threads_since_id()
+# def increment_global():
+#     MY_GLOBAL_PARAM += 1
+    
 
-# @shared_task
-# def task_two():
-#     # This task can be run anytime by user
-#     # Perform the necessary operations here
-#     pass
+from celery import shared_task
+from django.conf import settings
+from time import sleep
+
+@shared_task
+def increment_global_var():
+    # Access the global variable
+    global_var = settings.MY_GLOBAL_VAR
+    
+    # Increment the global variable
+    global_var += 1
+    
+    # Update the global variable
+    settings.MY_GLOBAL_VAR = global_var
+    
+    # Wait for 15 seconds before running the task again
+    sleep(15)
+    
+    # Call the task again
+    increment_global_var.delay()

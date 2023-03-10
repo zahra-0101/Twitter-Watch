@@ -86,13 +86,14 @@ WSGI_APPLICATION = 'TwitterWatch.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'kjlwmxao',
+       'NAME': 'kjlwmxao',
         'USER': 'kjlwmxao',
         'PASSWORD': 'XkgK5YPgvxDslRZRWllHSIzJH8Mo0nTg',
         'HOST': 'tiny.db.elephantsql.com',
         'PORT': '5432',
     }
 }
+
 
 
 # Password validation
@@ -153,3 +154,12 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# REDIS
+
+MY_GLOBAL_VAR = 0
+CELERY_BROKER_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379')
+CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL', 'redis://localhost:6379')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'

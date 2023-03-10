@@ -23,29 +23,31 @@ def update_accounts(api):
 
     accounts = TwitterAccount.objects.all()
     for account in accounts:
-        user = api.get_user(screen_name=account.twitter_handle)
+        for i, user in enumerate(sntwitter.TwitterSearchScraper("from:{}".format(account.twitter_handle)).get_items()):
 
-        account.display_name = user.name
-        account.bio = user.description
-        accounts.profile_picture = user.profile_image_url
-        accounts.follower_count = user.followers_count
-        account.following_count = user.friends_count
-        account.last_updated = timezone.now().time()
-        account.save()
+            account.display_name = user.user.displayname
+            account.bio = user.user.renderedDescription
+            accounts.profile_picture = user.user.profileImageUrl
+            accounts.follower_count = user.user.followersCount
+            account.following_count = user.user.friendsCount
+            account.last_updated = timezone.now().time()
+            account.save()
+            break
 
 
 def update_account(api, account, rate_limit):
     # updates a Twitter account information.
 
-    user = api.get_user(screen_name=account.twitter_handle)
-    account.display_name = user.name
-    account.bio = user.description
-    account.profile_picture = user.profile_image_url
-    account.follower_count = user.followers_count
-    account.following_count = user.friends_count
-    account.last_updated = timezone.now().time()
-    account.rate_limit = rate_limit
-    account.save()
+    for i, user in enumerate(sntwitter.TwitterSearchScraper("from:{}".format(account.twitter_handle)).get_items()):
+        account.display_name = user.user.displayname
+        account.bio = user.user.renderedDescription
+        account.profile_picture = user.user.profileImageUrl
+        account.follower_count = user.user.followersCount
+        account.following_count = user.user.friendsCount
+        account.last_updated = timezone.now().time()
+        account.rate_limit = rate_limit
+        account.save()
+        break
  
  
 # @handle_rate_limit_error
@@ -106,15 +108,15 @@ def database_initializer(api, accounts, since_time):
                 conversation=replies,
                 created_at=datetime.now()
                 )
-                # save the instance to the database
+                    # save the instance to the database
                 new_thread.save()
+                TwitterAccount.objects.filter(pk=account.id).update(
+                    last_tweet_id = tweet.id)
+                update_account(api, account, True)
+                print('database_initializer')
             except IntegrityError:
                 pass
 
-            TwitterAccount.objects.filter(pk=account.id).update(
-                last_tweet_id = tweet.id)
-            update_account(api, account, True)
-            print('database_initializer')
 
         update_account(api, account, False)
 
@@ -145,4 +147,15 @@ def update_database(api):
     update_accounts()
     accounts = TwitterAccount.objects.all().order_by('-last_updated')
     database_initializer(api, accounts, False)
+
+
+from django.http import HttpResponse
+from django.conf import settings
+
+def global_var_view(request):
+    # Access the global variable
+    global_var = settings.MY_GLOBAL_VAR
+    
+    # Return the value of the global variable as a plain text response
+    return HttpResponse(str(global_var))
 
