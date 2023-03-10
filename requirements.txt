@@ -8,4 +8,5 @@ psycopg2-binary==2.9.5
 redis==4.5.1
 snscrape==0.6.0.20230303
 tweepy==3.10.0
-
+celery==5.2.7
+django-redis==5.2.0
