@@ -1,0 +1,87 @@
+{% extends "base-dashboard.html" %}
+{% load i18n %}
+{% block secondary_menu %}
+{% endblock secondary_menu %}
+{% load static %}
+
+{% block title %}
+<!-- {% trans 'Accounts' %} -->
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item">
+    <a href=""><i class="icon-home"></i>
+    </a>
+</li>
+<li class="breadcrumb-item active">{% trans 'Accounts' %}</li>
+{% endblock %}
+                                    
+
+{% block content %}
+
+<section class="container assess-list">
+    <div class="container-fluid project-list">
+        <div class="row clearfix">
+            {% for account in accounts %}
+                <div class="col-sm-12 col-md-12 col-lg-4">
+                    <div class="card member-card">
+                        <div class="header" style="background-image: url('{{ account.banner_url }}'); background-size: cover;">
+                            
+                        </div>
+                        <div class="member-img">
+                            <a href="profile.html" class="">
+                            <img src="{{ account.profile_picture }}" class="rounded-circle" alt="profile-image">
+                            </a>
+                        </div>
+                        <div class="body">
+                            <div class="col-12">
+                                <h4 class="m-t-10">{{ account.display_name }}</h4>
+                                <ul class="social-links list-unstyled">
+                                    <li><a title="twitter" href="{{ account.twitter_url }}"><i class="zmdi zmdi-twitter"></i></a></li>
+                                </ul>
+                                <span class="module">
+                                    <p class="text-muted collapse readmore">{{ account.bio }}</p>
+
+                                </span>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-6">
+                                    <h5 class="m-b-0 my-number">{{ account.following_count }}</h5>
+                                    <small>Following</small>
+                                </div>
+                                <div class="col-6">
+                                    <h5 class="m-b-0 my-number">{{ account.follower_count }}</h5>
+                                    <small>Follower</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function formatNumberWithCommas(number) {
+     return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+   }
+   var myNumberElements = document.querySelectorAll(".my-number");
+
+    // Loop through all the elements and format their numbers
+    for (var i = 0; i < myNumberElements.length; i++) {
+    // Get the number from the HTML element
+    var myNumber = parseInt(myNumberElements[i].innerText);
+
+    // Format the number using the formatNumberWithCommas() function
+    var formattedNumber = formatNumberWithCommas(myNumber);
+
+    // Insert the formatted number back into the HTML element
+    myNumberElements[i].innerText = formattedNumber;
+    }
+ </script>
+{% endblock %}

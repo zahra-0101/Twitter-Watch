@@ -60,9 +60,12 @@ class TwitterAccount(models.Model):
         null=True,
         blank=True
     )
-
+    
+    twitter_url = models.URLField(blank=True, null=True)
+    banner_url = models.URLField(blank=True, null=True)
+    
     last_updated = models.DateTimeField(auto_now=True)
-
+    
     rate_limit = models.BooleanField(default=False)
     def __str__(self):
         """
@@ -125,7 +128,7 @@ class TwitterThread(models.Model):
     unique_user = models.IntegerField(null=True) # the number of unique users contributed in the thread
 
     class Meta:
-        unique_together = ['account', 'tweet_id']
+        # unique_together = ['account', 'tweet_id']
         verbose_name = "Twitter Thread"
         verbose_name_plural = "Twitter Threads"
 

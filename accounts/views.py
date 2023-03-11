@@ -31,6 +31,9 @@ def update_accounts(api):
             accounts.follower_count = user.user.followersCount
             account.following_count = user.user.friendsCount
             account.last_updated = timezone.now().time()
+            account.bio = user.user.description
+            account.twitter_url = user.url
+            account.banner_url = user.user.profileBannerUrl
             account.save()
             break
 
@@ -46,6 +49,8 @@ def update_account(api, account, rate_limit):
         account.following_count = user.user.friendsCount
         account.last_updated = timezone.now().time()
         account.rate_limit = rate_limit
+        account.bio = user.user.description
+        account.twitter_url = user.url
         account.save()
         break
  
@@ -131,6 +136,10 @@ def update_tweets_for_user(api):
     tweets = []
     since_time = dt.date(2023, 2, 1)  # set the time range as February 1st, 2023
     accounts = TwitterAccount.objects.all()
+
+    #TODO delete it 
+    update_accounts()
+
 
     if accounts.exists():
         # initializing database
