@@ -158,8 +158,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # REDIS
 
 MY_GLOBAL_VAR = 0
-CELERY_BROKER_URL = redis://default:j1DkEedaKAb1k53CJTlxDnkpcmuMQwOi@redis-14418.c299.asia-northeast1-1.gce.cloud.redislabs.com:14418
-CELERY_RESULT_BACKEND = redis://default:j1DkEedaKAb1k53CJTlxDnkpcmuMQwOi@redis-14418.c299.asia-northeast1-1.gce.cloud.redislabs.com:14418
+CELERY_BROKER_URL = 'redis://default:j1DkEedaKAb1k53CJTlxDnkpcmuMQwOi@redis-14418.c299.asia-northeast1-1.gce.cloud.redislabs.com:14418'
+CELERY_RESULT_BACKEND = 'redis://default:j1DkEedaKAb1k53CJTlxDnkpcmuMQwOi@redis-14418.c299.asia-northeast1-1.gce.cloud.redislabs.com:14418'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
