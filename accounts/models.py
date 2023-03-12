@@ -102,7 +102,7 @@ class TwitterThread(models.Model):
         blank=True)
 
     # Thread conversation (as a JSON string)
-    conversation = models.TextField(blank=True, null=True)
+    conversation = models.JSONField(blank=True, null=True)
 
     # Date when the thread was added to the database
     created_at = models.DateTimeField(auto_now_add=True)

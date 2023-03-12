@@ -31,8 +31,11 @@ class AudienceInfoSerializer(serializers.Serializer):
     audience_sentiment_subjectivity = serializers.IntegerField()
     # user_dic = serializers.JSONField()
 
+
 class SentimentSerializer(serializers.Serializer):
-    followers_count = serializers.IntegerField()
-    following_count = serializers.IntegerField()
-    tweet_count = serializers.IntegerField()
-    created_at = serializers.DateTimeField()
+    followers_count= serializers.IntegerField()
+    following_count= serializers.IntegerField()
+    verified= serializers.BooleanField()
+    viewCount= serializers.IntegerField()
+    avg_thread_level= serializers.IntegerField()
+    unique_audience_level= serializers.IntegerField()

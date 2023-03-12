@@ -10,19 +10,21 @@ from rest_framework.views import APIView
 from accounts.models import TwitterAccount, TwitterThread
 
 from .serializers import (AudienceInfoSerializer, TwitterAccountSerializer,
-                          TwitterThreadSerializer)
+                          TwitterThreadSerializer, SentimentSerializer)
 
 import snscrape.modules.twitter as sntwitter
 from accounts.views import get_all_replies_belong_to_the_last_n_tweets
-from textblob import TextBlob
+import statistics
+
+# from textblob import TextBlob
 
 # Download the VADER lexicon if it is not already installed
 
-def sentiment_analyzer(text):
+# def sentiment_analyzer(text):
 
-    blob = TextBlob(text)
-    sentiment_score = blob.sentiment
-    return sentiment_score
+#     blob = TextBlob(text)
+#     sentiment_score = blob.sentiment
+#     return sentiment_score
 
 
 class TwitterAccountList(generics.ListCreateAPIView):
@@ -55,7 +57,9 @@ class AudienceInfoAPIView(generics.GenericAPIView ):
 
         replies, avg_likeCount, avg_quoteCount, avg_replyCount = get_all_replies_belong_to_the_last_n_tweets(twitter_handle, 5)
 
-        sentiment_polarity = sentiment_analyzer(' '.join(replies))
+        # TODO: deploy it somewhere else 
+        # sentiment_polarity = sentiment_analyzer(' '.join(replies))
+        # sentiment_polarity = sentiment_analyzer(' '.join(replies))
 
         # Serialize the audience information and return it as a response
         audience_info = {
@@ -65,8 +69,9 @@ class AudienceInfoAPIView(generics.GenericAPIView ):
             'avg_likeCount': avg_likeCount,
             'avg_quoteCount': avg_quoteCount,
             'avg_replyCount': avg_replyCount,
-            'audience_sentiment_polarity': sentiment_polarity.polarity,
-            'audience_sentiment_subjectivity': sentiment_polarity.subjectivity,
+            # TODO: deploy it on 'Azure' uncomment the upper code, it doesn't work on Vercel
+            'audience_sentiment_polarity': 0,
+            'audience_sentiment_subjectivity': 0,
             
         }
         serializer = AudienceInfoSerializer(audience_info)
@@ -86,17 +91,27 @@ class SentimentAPIView(generics.GenericAPIView ):
             viewCount = user.viewCount
             break
 
-        thread_level = 0
-        audience_level = 0 
-    
 
+        if TwitterAccount.objects.filter(twitter_handle=twitter_handle).exists():
+
+            thread_level = []
+            unique_audience_level = []
+
+            threads = TwitterThread.objects.filter(account__twitter_handle=twitter_handle).values_list('conversation', flat=True)
+            for thread in threads:
+                thread_level.append(len(thread))
+                for thread_num in thread[1:]:
+                    unique_audience_level.append(thread_num['author'])
+                
         # Serialize the audience information and return it as a response
         audience_info = {
             'followers_count': followers_count,
             'following_count': following_count,
             'verified': verified,
             'viewCount': viewCount,
+            'avg_thread_level': statistics.mean(thread_level),
+            'unique_audience_level': len(set(unique_audience_level)),
             
         }
-        serializer = AudienceInfoSerializer(audience_info)
+        serializer = SentimentSerializer(audience_info)
         return Response(serializer.data)
