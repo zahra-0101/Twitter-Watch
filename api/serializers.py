@@ -28,6 +28,7 @@ class AudienceInfoSerializer(serializers.Serializer):
     avg_quoteCount = serializers.IntegerField()
     avg_replyCount = serializers.IntegerField()
     audience_sentiment_polarity = serializers.IntegerField()
+    audience_sentiment_subjectivity = serializers.IntegerField()
     # user_dic = serializers.JSONField()
 
 class SentimentSerializer(serializers.Serializer):
