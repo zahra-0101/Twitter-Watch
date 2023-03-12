@@ -13,6 +13,8 @@ from django.db import IntegrityError
 from accounts.models import TwitterAccount, TwitterThread
 
 from .decorators import handle_rate_limit_error, authenticate
+import statistics
+
 
 utc=pytz.UTC
 
@@ -87,6 +89,26 @@ def get_all_replies_belong_to_a_tweet(api, account, tweet):
             'friendsCount': reply.user.friendsCount
         })
     return replies
+
+
+def get_all_replies_belong_to_the_last_n_tweets(twitter_handle, num_tweets):
+
+    tweets = []
+    replies = []
+    avg_likeCount = []
+    avg_quoteCount = [] 
+    avg_replyCount = []
+    for i, tweet in enumerate(sntwitter.TwitterSearchScraper("from:{}".format(twitter_handle)).get_items()):
+        if len(tweets) == num_tweets:
+            break
+        avg_likeCount.append(tweet.likeCount)
+        avg_quoteCount.append(tweet.quoteCount)
+        avg_replyCount.append(tweet.replyCount)
+        tweets.append(tweet)
+        for i, reply in enumerate(sntwitter.TwitterSearchScraper(f'conversation_id:{tweet.conversationId} filter:safe').get_items()):
+            replies.append(reply.rawContent)
+
+    return replies, statistics.mean(avg_likeCount), statistics.mean(avg_quoteCount), statistics.mean(avg_replyCount)
 
 
 @handle_rate_limit_error

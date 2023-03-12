@@ -23,8 +23,11 @@ class TwitterThreadSerializer(serializers.ModelSerializer):
 class AudienceInfoSerializer(serializers.Serializer):
     followers_count = serializers.IntegerField()
     following_count = serializers.IntegerField()
-    tweet_count = serializers.IntegerField()
     followers_to_following_rate = serializers.IntegerField()
+    avg_likeCount = serializers.IntegerField()
+    avg_quoteCount = serializers.IntegerField()
+    avg_replyCount = serializers.IntegerField()
+    audience_sentiment_polarity = serializers.IntegerField()
     # user_dic = serializers.JSONField()
 
 class SentimentSerializer(serializers.Serializer):

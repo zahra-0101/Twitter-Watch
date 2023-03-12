@@ -12,6 +12,21 @@ from accounts.models import TwitterAccount, TwitterThread
 from .serializers import (AudienceInfoSerializer, TwitterAccountSerializer,
                           TwitterThreadSerializer)
 
+import snscrape.modules.twitter as sntwitter
+from accounts.views import get_all_replies_belong_to_the_last_n_tweets
+import nltk
+from nltk.sentiment import SentimentIntensityAnalyzer
+import nltk
+
+# Download the VADER lexicon if it is not already installed
+nltk.download('vader_lexicon')
+
+def sentiment_analyzer(text):
+
+    analyzer = SentimentIntensityAnalyzer()
+    sentiment_score = analyzer.polarity_scores(text)
+    return sentiment_score['compound']
+
 
 class TwitterAccountList(generics.ListCreateAPIView):
     queryset = TwitterAccount.objects.all()
@@ -28,49 +43,33 @@ class TwitterThreadAPIView(APIView):
 
         # Return the serialized data as a HTTP response
         return Response(serializer.data)
-    
+
 
 class AudienceInfoAPIView(generics.GenericAPIView ):
     serializer_class = AudienceInfoSerializer
 
     def get(self, request, twitter_handle, format=None):
-        # Authenticate with the Twitter API
-        config_path = os.path.join(os.path.dirname(
-            os.path.dirname(os.path.abspath(__file__))), 'config.ini')
 
-        # Read the Twitter API credentials from conf/ig.ini
-        config = configparser.ConfigParser()
-        config.read(config_path)
-        consumer_key = os.environ.get('consumer_key')
-        consumer_secret = os.environ.get('consumer_secret')
-        access_token = os.environ.get('access_token')
-        access_token_secret = os.environ.get('access_token_secret')
-        auth = tweepy.OAuthHandler(consumer_key, consumer_secret, access_token, access_token_secret)
-        api = tweepy.API(auth)
-        user = api.get_user(screen_name=twitter_handle)
+        for i, user in enumerate(sntwitter.TwitterSearchScraper("from:{}".format(twitter_handle)).get_items()):
+            # Retrieve the audience information for the user
+            followers_count = user.user.followersCount
+            following_count = user.user.friendsCount
+            break
 
-        # Retrieve the audience information for the user
-        followers_count = user.followers_count
-        following_count = user.friends_count
-        tweet_count = user.statuses_count
+        replies, avg_likeCount, avg_quoteCount, avg_replyCount = get_all_replies_belong_to_the_last_n_tweets(twitter_handle, 5)
 
-        # TODO: Uncomment this code to retrieve more audience information
-        # tweets = get_last_200_tweets(api, twitter_handle)
-        # replies = []
-        # for tweet in tweets:
-        #     replies.append({
-        #         get_all_replies_belong_to_a_tweet(api, tweet)
-        #     })
-        # users_screen_name, users_location = extract_unique_user_from_replies(replies)
-
+        # sentiment_polarity = sentiment_analyzer(' '.join(replies))
+        sentiment_polarity = None
         # Serialize the audience information and return it as a response
         audience_info = {
             'followers_count': followers_count,
             'following_count': following_count,
             'followers_to_following_rate': followers_count/following_count,
-            'tweet_count': tweet_count,
-            # 'users_who_are_replied': users_screen_name,
-            # 'users_location': users_location,
+            'avg_likeCount': avg_likeCount,
+            'avg_quoteCount': avg_quoteCount,
+            'avg_replyCount': avg_replyCount,
+            'audience_sentiment_polarity': sentiment_polarity
+            
         }
         serializer = AudienceInfoSerializer(audience_info)
         return Response(serializer.data)
