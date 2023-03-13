@@ -16,6 +16,7 @@ In addition to collecting and updating data from these accounts, our Django app 
 #### nltk for sentiment analysis
 #### Celery - updates accounts and tweets every 15 minutes.
 #### Redis cloud - (https://redis.com/redis-enterprise-cloud/overview/)
+#### ElephantSQL (https://www.elephantsql.com/)
 #### Vercel for deploying my project (https://vercel.com/)
     
     
@@ -23,8 +24,8 @@ In addition to collecting and updating data from these accounts, our Django app 
     
 ## API Endpoints
 
-1) 
-2)
+1) https://twitter-watch-three.vercel.app/api/accounts/
+2) 
 3)
 4)
 
@@ -41,6 +42,10 @@ In order to get started, following software dependencies are required:
 
 ## Database migration strategy
 
+### Models
+    this project includes two models to manage Twitter accounts and threads.
+    `TwitterAccount`
+    `TwitterThread`
 Each change in the code that is impacting detabase schema
 must be accompanied by some code responsible for keeping the database in sync.
 
