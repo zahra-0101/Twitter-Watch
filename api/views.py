@@ -49,6 +49,8 @@ class AudienceInfoAPIView(generics.GenericAPIView ):
 
     def get(self, request, twitter_handle, format=None):
 
+        followers_count = 0
+        following_count = 0
         for i, user in enumerate(sntwitter.TwitterSearchScraper("from:{}".format(twitter_handle)).get_items()):
             # Retrieve the audience information for the user
             followers_count = user.user.followersCount
@@ -60,12 +62,14 @@ class AudienceInfoAPIView(generics.GenericAPIView ):
         # TODO: deploy it somewhere else 
         # sentiment_polarity = sentiment_analyzer(' '.join(replies))
         # sentiment_polarity = sentiment_analyzer(' '.join(replies))
-
+        rate_follower_foloowing = 0
+        if following_count is not 0:
+            rate_follower_foloowing = followers_count/following_count  
         # Serialize the audience information and return it as a response
         audience_info = {
             'followers_count': followers_count,
             'following_count': following_count,
-            'followers_to_following_rate': followers_count/following_count,
+            'followers_to_following_rate': rate_follower_foloowing,
             'avg_likeCount': avg_likeCount,
             'avg_quoteCount': avg_quoteCount,
             'avg_replyCount': avg_replyCount,

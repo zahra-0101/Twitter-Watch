@@ -93,20 +93,33 @@ def get_all_replies_belong_to_the_last_n_tweets(twitter_handle, num_tweets):
 
     tweets = []
     replies = []
-    avg_likeCount = []
-    avg_quoteCount = [] 
-    avg_replyCount = []
-    for i, tweet in enumerate(sntwitter.TwitterSearchScraper("from:{}".format(twitter_handle)).get_items()):
+    likeCount = []
+    quoteCount = [] 
+    replyCount = []
+    for i, tweet in enumerate(sntwitter.TwitterSearchScraper(f'from:{twitter_handle} filter:safe').get_items()):
         if len(tweets) == num_tweets:
             break
-        avg_likeCount.append(tweet.likeCount)
-        avg_quoteCount.append(tweet.quoteCount)
-        avg_replyCount.append(tweet.replyCount)
+        likeCount.append(tweet.likeCount)
+        quoteCount.append(tweet.quoteCount)
+        replyCount.append(tweet.replyCount)
         tweets.append(tweet)
         for i, reply in enumerate(sntwitter.TwitterSearchScraper(f'conversation_id:{tweet.conversationId} filter:safe').get_items()):
             replies.append(reply.rawContent)
 
-    return replies, statistics.mean(avg_likeCount), statistics.mean(avg_quoteCount), statistics.mean(avg_replyCount)
+    avg_likeCount = 0
+    avg_quoteCount = 0 
+    avg_replyCount = 0
+    
+    if len(likeCount) > 0:
+        avg_likeCount = statistics.mean(likeCount)
+    
+    if len(quoteCount) > 0:
+        avg_quoteCount = statistics.mean(quoteCount)
+
+    if len(replyCount) > 0:
+        avg_replyCount = statistics.mean(replyCount)
+
+    return replies, avg_likeCount, avg_quoteCount, avg_replyCount
 
 
 @handle_rate_limit_error
@@ -135,9 +148,12 @@ def database_initializer(api, accounts, since_time):
                 )
                     # save the instance to the database
                 new_thread.save()
-                TwitterAccount.objects.filter(pk=account.id).update(
-                    last_tweet_id = tweet.id)
-                update_account(api, account, True)
+                # TwitterAccount.objects.filter(account_id=account.account_id).update(
+                #     last_tweet_id = tweet.conversationId)
+                twitter_account = TwitterAccount.objects.filter(account_id=account.account_id).first()
+                twitter_account.last_tweet_id = tweet.conversationId
+                twitter_account.save()
+                update_account(api, twitter_account, True)
                 print('database_initializer')
             except IntegrityError:
                 pass
@@ -170,7 +186,7 @@ def update_database(api):
     """
 
     update_accounts()
-    accounts = TwitterAccount.objects.all().order_by('-last_updated')
+    accounts = TwitterAccount.objects.all()
     database_initializer(api, accounts, False)
 
 
