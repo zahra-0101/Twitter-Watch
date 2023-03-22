@@ -25,9 +25,9 @@ In addition to collecting and updating data from these accounts, our Django app 
 ## API Endpoints
 
 1) https://twitter-watch-three.vercel.app/api/accounts/
-2) 
-3)
-4)
+2) https://twitter-watch-three.vercel.app/api/tweets/cathiedwood
+3) https://twitter-watch-three.vercel.app/api/audience/cathiedwood/ (It works for any user in tweeter)
+4) https://twitter-watch-three.vercel.app/api/sentiment/cathiedwood/ (it only works for three users)
 
 
 
